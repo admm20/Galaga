@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Galaga", "Galaga\Galaga.csproj", "{05787935-043D-46CE-9482-7C2E5AA49684}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{05787935-043D-46CE-9482-7C2E5AA49684}.Debug|x86.ActiveCfg = Debug|x86
+		{05787935-043D-46CE-9482-7C2E5AA49684}.Debug|x86.Build.0 = Debug|x86
+		{05787935-043D-46CE-9482-7C2E5AA49684}.Release|x86.ActiveCfg = Release|x86
+		{05787935-043D-46CE-9482-7C2E5AA49684}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {952510F3-69EB-4895-8DC7-8236F4A0709D}
+	EndGlobalSection
+EndGlobal
