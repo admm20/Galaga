@@ -13,3 +13,8 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Textures/galaga.png
+/importer:
+/processor:
+/build:Textures/galaga.png
+

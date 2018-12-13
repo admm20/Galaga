@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Galaga")]
-[assembly: AssemblyProduct("Galaga")]
+[assembly: AssemblyTitle("GalagaWindows")]
+[assembly: AssemblyProduct("GalagaWindows")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyCompany("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("61432ff9-d291-44b0-9988-f3085514358a")]
+[assembly: Guid("87680bb5-a808-4505-a6c6-31ba8c60e628")]
 
 // Version information for an assembly consists of the following four values:
 //
