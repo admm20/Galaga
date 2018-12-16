@@ -1,7 +1,9 @@
 ﻿
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 #if ANDROID
 using Android.OS;
@@ -9,71 +11,114 @@ using Android.OS;
 
 namespace Galaga
 {
-    /// <summary>
-    /// This is the main type for your game.
-    /// </summary>
+
     public class GalagaGame : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        Texture2D testTexture;
+        public static int GAME_WIDTH, GAME_HEIGHT;
+
+
+        // aspect ratio is different for windows and android version
+        private float gameWidthRatio;
+        
+        private RenderTarget2D gameRenderer;
+
+        GameMode currentMode;
+        GameMode gameMode;
+        GameMode menu;
+
+        public int deltaTime = 1;
+
+#if WINDOWS
+        public event EventHandler KeyboardKeysDown;
+        public event EventHandler KeyboardKeyClicked;
+        KeyboardState previousKbState;
+
+        private void KbKeysDown(EventArgs e)
+        {
+            EventHandler handler = KeyboardKeysDown;
+            if (handler != null)
+            {
+                handler(this, e);
+            }
+        }
+        private void KbKeyClicked(EventArgs e)
+        {
+            EventHandler handler = KeyboardKeyClicked;
+            if (handler != null)
+            {
+                handler(this, e);
+            }
+        }
+#endif
+
+        public void RunGameMode()
+        {
+            currentMode = gameMode;
+            currentMode.OnEnter();
+        }
+
+        public void RunMenu()
+        {
+            currentMode = menu;
+            currentMode.OnEnter();
+        }
 
         public GalagaGame()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-#if ANDROID
+            IsMouseVisible = true;
+            Window.AllowUserResizing = true;
+
+#if WINDOWS
+            GAME_WIDTH = 1560;
+            GAME_HEIGHT = 1920;
+            gameWidthRatio = 13;
+            graphics.PreferredBackBufferWidth = 720;
+            graphics.PreferredBackBufferHeight = 720;
+#elif ANDROID
+            GAME_WIDTH = 1080;
+            GAME_HEIGHT = 1920;
+            gameWidthRatio = 9;
             graphics.IsFullScreen = true;
-            graphics.PreferredBackBufferWidth = 800;
-            graphics.PreferredBackBufferHeight = 480;
+            graphics.PreferredBackBufferWidth = 1080;
+            graphics.PreferredBackBufferHeight = 1920;
             graphics.SupportedOrientations = DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight;
 #endif
         }
 
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            gameRenderer = new RenderTarget2D(GraphicsDevice, GAME_WIDTH, GAME_HEIGHT);
+
+            gameMode = new GameMode(this);
+            menu = new GameMode(this);
+            RunGameMode();
 
             base.Initialize();
         }
 
-        /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
-        /// </summary>
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            System.Console.WriteLine(Content.RootDirectory);
-            testTexture = Content.Load<Texture2D>("Textures/galaga");
+            gameMode.LoadContent(Content);
+            menu.LoadContent(Content);
 
         }
 
-        /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// game-specific content.
-        /// </summary>
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
         }
 
-        /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
 #if WINDOWS
@@ -88,21 +133,66 @@ namespace Galaga
 #endif
 
             // TODO: Add your update logic here
+            Timer.UpdateAllTimers(gameTime.ElapsedGameTime.Milliseconds);
+
+#if WINDOWS
+            KeyboardState kbState = Keyboard.GetState();
+            Keys[] keys = kbState.GetPressedKeys();
+            if(keys.Length > 0)
+            {
+                KbKeysDown(new KeyboardKeysDownEventArgs(keys));
+                
+                foreach (Keys k in keys)
+                {
+                    if(previousKbState.IsKeyUp(k))
+                    {
+                        KbKeyClicked(new KeyboardKeyClickedEventArgs(k));
+                    }
+                }
+            }
+
+            previousKbState = kbState;
+#endif
+
+            deltaTime = gameTime.ElapsedGameTime.Milliseconds;
+
+            currentMode.Update(deltaTime);
+            
+
 
             base.Update(gameTime);
         }
 
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.SetRenderTarget(gameRenderer);
 
-            // TODO: Add your drawing code here
+            GraphicsDevice.Clear(Color.Black);
+
+            currentMode.Draw(spriteBatch);
+            
+            // Game will be displayed in specified proportions (13:16 on windows and 9:16 on android) 
+            PresentationParameters windowSize = GraphicsDevice.PresentationParameters;
+            Rectangle rendererPosition = new Rectangle(0, 0, windowSize.BackBufferWidth,
+                windowSize.BackBufferHeight);
+            
+
+            if (rendererPosition.Width > rendererPosition.Height * gameWidthRatio / 16.0) // too wide
+            {
+                rendererPosition.Width = (int)(rendererPosition.Height * (gameWidthRatio / 16.0));
+                rendererPosition.X = (int)((windowSize.BackBufferWidth - rendererPosition.Width) / 2.0);
+            }
+            else
+            {
+                rendererPosition.Height = (int)(rendererPosition.Width * (16.0 / gameWidthRatio));
+                rendererPosition.Y = (int)((windowSize.BackBufferHeight - rendererPosition.Height) / 2.0);
+            }
+
+            GraphicsDevice.SetRenderTarget(null);
+            GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
-            spriteBatch.Draw(testTexture, Vector2.Zero, Color.White);
+            spriteBatch.Draw(gameRenderer, rendererPosition, Color.White);
+            //spriteBatch.Draw(blackTile, rendererPosition, Color.White * transition_opacity);
             spriteBatch.End();
 
             base.Draw(gameTime);

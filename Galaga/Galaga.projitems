@@ -9,6 +9,17 @@
     <Import_RootNamespace>Galaga</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Bullet.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EnemyShip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)KeyboardEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PlayerShip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QuadraticBezier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RotatingShip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShipTypeEnum.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GalagaGame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Menu.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Timer.cs" />
   </ItemGroup>
 </Project>
