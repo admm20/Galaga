@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -27,6 +28,10 @@ namespace Galaga
         Texture2D numbersTexture;
         Texture2D fireTexture;
 
+        SoundEffect destroy_enemy;
+        SoundEffect explosion;
+        SoundEffect shot;
+
         private int Lifes = 3;
         private int Points = 0;
 
@@ -35,6 +40,7 @@ namespace Galaga
             switch (ev)
             {
                 case GameEventEnum.ENEMY_DESTROYED:
+                    destroy_enemy.Play(0.5f, 0, 0);
                     Points += 10;
                     if(RotatingShip.ListOfShips.Count < 2)
                     {
@@ -42,6 +48,7 @@ namespace Galaga
                     }
                     break;
                 case GameEventEnum.PLAYER_DESTROYED:
+                    explosion.Play(0.5f, 0, 0);
                     Lifes--;
                     if (Lifes < 1)
                         GameEvent(GameEventEnum.GAME_OVER);
@@ -54,6 +61,7 @@ namespace Galaga
                     }
                     break;
                 case GameEventEnum.PLAYER_FIRE:
+                    shot.Play(0.5f, 0, 0);
                     break;
                 case GameEventEnum.GAME_OVER:
 #if WINDOWS
@@ -107,6 +115,11 @@ namespace Galaga
             Bullet.BulletTexture = content.Load<Texture2D>("Textures/bullet");
             numbersTexture = content.Load<Texture2D>("Textures/numbers");
             fireTexture = content.Load<Texture2D>("Textures/fire_button");
+
+            //audio
+            destroy_enemy = content.Load<SoundEffect>("Audio/destroy_enemy");
+            explosion = content.Load<SoundEffect>("Audio/explosion");
+            shot = content.Load<SoundEffect>("Audio/shot");
         }
 
         private void SpawnAllEnemies()

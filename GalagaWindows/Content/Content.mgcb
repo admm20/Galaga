@@ -169,3 +169,21 @@
 /processorParam:TextureFormat=Color
 /build:Textures/fire_button.png
 
+#begin Audio/destroy_enemy.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/destroy_enemy.wav
+
+#begin Audio/explosion.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/explosion.wav
+
+#begin Audio/shot.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/shot.wav
+
