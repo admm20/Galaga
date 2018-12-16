@@ -25,6 +25,7 @@ namespace Galaga
         Random random;
 
         Texture2D numbersTexture;
+        Texture2D fireTexture;
 
         private int Lifes = 3;
         private int Points = 0;
@@ -47,7 +48,7 @@ namespace Galaga
                     else
                     {
                         Timer respawn = new Timer((t) => {
-                            playerShip = new PlayerShip(GalagaGame.GAME_WIDTH / 2, GalagaGame.GAME_HEIGHT - 150);
+                            playerShip = new PlayerShip(GalagaGame.GAME_WIDTH / 2, GalagaGame.GAME_HEIGHT - 200);
                         },
                         500, false);
                     }
@@ -58,6 +59,9 @@ namespace Galaga
 #if WINDOWS
                     game.KeyboardKeysDown -= KeysHoldDown;
                     game.KeyboardKeyClicked -= KeyClicked;
+#elif ANDROID
+                    game.ScreenTapped -= ScreenTapped;
+                    game.ScreenTouched -= ScreenTouched;
 #endif
                     game.RunMenu();
                     break;
@@ -89,6 +93,11 @@ namespace Galaga
                 spriteBatch.Draw(numbersTexture, new Vector2(GalagaGame.GAME_WIDTH - 100 + i * 40, 50), new Rectangle(digit * width, 0, width, 30), Color.White);
             }
 
+            // draw fire button in android version
+#if ANDROID
+            spriteBatch.Draw(fireTexture, new Vector2(700, 1300), Color.White*0.8f);
+#endif
+
             spriteBatch.End();
         }
 
@@ -97,6 +106,7 @@ namespace Galaga
             RotatingShip.EnemyAndPlayerTexture = content.Load<Texture2D>("Textures/enemies_player");
             Bullet.BulletTexture = content.Load<Texture2D>("Textures/bullet");
             numbersTexture = content.Load<Texture2D>("Textures/numbers");
+            fireTexture = content.Load<Texture2D>("Textures/fire_button");
         }
 
         private void SpawnAllEnemies()
@@ -140,9 +150,12 @@ namespace Galaga
 #if WINDOWS
             game.KeyboardKeysDown += KeysHoldDown;
             game.KeyboardKeyClicked += KeyClicked;
+#elif ANDROID
+            game.ScreenTapped += ScreenTapped;
+            game.ScreenTouched += ScreenTouched;
 #endif
 
-            playerShip = new PlayerShip(GalagaGame.GAME_WIDTH / 2, GalagaGame.GAME_HEIGHT - 150);
+            playerShip = new PlayerShip(GalagaGame.GAME_WIDTH / 2, GalagaGame.GAME_HEIGHT - 200);
             
             enemyGrid = new EnemyGrid(new Vector2(100, 200));
 
@@ -184,6 +197,45 @@ namespace Galaga
             
         }
 
+        void ScreenTapped(object s, EventArgs _t)
+        {
+            ScreenTapEventArgs t = (ScreenTapEventArgs)_t;
+            
+            Point click = new Point(t.x, t.y);
+            Rectangle fireButtonPos = new Rectangle(700, 1300, fireTexture.Width, fireTexture.Height);
+            if (fireButtonPos.Contains(click))
+            {
+                // don't shoot if player is dead
+                if (!RotatingShip.ListOfShips.Contains(playerShip))
+                    return;
+
+                Bullet b = new Bullet(playerShip.Hitbox.Center.X - 2 * RotatingShip.Scale, playerShip.Position.Y, BulletType.ALLY);
+                GameEvent(GameEventEnum.PLAYER_FIRE);
+            }
+        }
+
+        int movingTouchId = -1;
+        void ScreenTouched(object s, EventArgs _t)
+        {
+            ScreenTouchEventArgs t = (ScreenTouchEventArgs)_t;
+            Point click = new Point(t.x, t.y);
+            Rectangle biggerPlayerHitbox = playerShip.Hitbox;
+            biggerPlayerHitbox.X -= 100;
+            biggerPlayerHitbox.Y -= 100;
+            biggerPlayerHitbox.Width += 100;
+            biggerPlayerHitbox.Height += 100;
+            Console.WriteLine(biggerPlayerHitbox.Width);
+            if (biggerPlayerHitbox.Contains(click))
+            {
+                movingTouchId = t.id;
+            }
+
+            if(movingTouchId == t.id)
+            {
+                playerShip.MovePlayer(t.x);
+            }
+        }
+
         void KeysHoldDown(object s, EventArgs _k)
         {
             KeyboardKeysDownEventArgs k = (KeyboardKeysDownEventArgs)_k;
@@ -206,6 +258,10 @@ namespace Galaga
             KeyboardKeyClickedEventArgs k = (KeyboardKeyClickedEventArgs)_k;
             if (k.key == Keys.Space)
             {
+                // don't shoot if player is dead
+                if (!RotatingShip.ListOfShips.Contains(playerShip))
+                    return;
+
                 Bullet b = new Bullet(playerShip.Hitbox.Center.X - 2 * RotatingShip.Scale, playerShip.Position.Y, BulletType.ALLY);
                 GameEvent(GameEventEnum.PLAYER_FIRE);
             }

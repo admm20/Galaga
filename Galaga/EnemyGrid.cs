@@ -14,7 +14,11 @@ namespace Galaga
         public const int COLS = 6, ROWS = 4;
 
         // gap between enemies in px
+#if ANDROID
+        public const int gap = 3;
+#elif WINDOWS
         public const int gap = 7;
+#endif
 
         // true - grid is moving to the left, false - moving to the right
         public bool movingRight;
@@ -22,9 +26,7 @@ namespace Galaga
 
         public EnemyGrid(Vector2 startingPosition)
         {
-#if ANDROID
-            gap = 3;
-#endif
+
             Position = startingPosition;
             movingRight = true;
             Speed = 0.8f;

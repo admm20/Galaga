@@ -6,6 +6,10 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+#if ANDROID
+using Android.OS;
+#endif
+
 namespace Galaga
 {
     class Menu : GameState
@@ -49,7 +53,11 @@ namespace Galaga
 
         public override void OnEnter()
         {
+#if WINDOWS
             game.KeyboardKeyClicked += KeyClicked;
+#elif ANDROID
+            game.ScreenTapped += ScreenTapped;
+#endif
         }
 
         void KeyClicked(object s, EventArgs _k)
@@ -71,11 +79,36 @@ namespace Galaga
             {
                 if(hover==1)
                 {
+
+#if WINDOWS
                     game.KeyboardKeyClicked -= KeyClicked;
+#endif
                     game.RunGameMode();
                 }
             }
         }
+#if ANDROID
+        void ScreenTapped(object s, EventArgs _t)
+        {
+            ScreenTapEventArgs t = (ScreenTapEventArgs)_t;
+
+            Rectangle startRect = new Rectangle(GalagaGame.GAME_WIDTH / 2 - start_button.Width / 2, 900, 
+                start_button.Width, start_button.Height);
+            Rectangle exitRect = new Rectangle(GalagaGame.GAME_WIDTH / 2 - end_button.Width / 2, 1100,
+                end_button.Width, end_button.Height);
+            //new Vector2(GalagaGame.GAME_WIDTH / 2 - start_selected_button.Width / 2, 900)
+            Point click = new Point(t.x, t.y);
+            if (startRect.Contains(click))
+            {
+                game.ScreenTapped -= ScreenTapped;
+                game.RunGameMode();
+            }
+            else if (exitRect.Contains(click))
+            {
+                Process.KillProcess(Process.MyPid());
+            }
+        }
+#endif
 
         public override void TransitionEffectCompleted()
         {

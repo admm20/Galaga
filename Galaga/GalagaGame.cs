@@ -7,6 +7,7 @@ using System;
 
 #if ANDROID
 using Android.OS;
+using Microsoft.Xna.Framework.Input.Touch;
 #endif
 
 namespace Galaga
@@ -52,8 +53,28 @@ namespace Galaga
                 handler(this, e);
             }
         }
-#endif
+#elif ANDROID
+        public event EventHandler ScreenTouched;
+        public event EventHandler ScreenTapped;
 
+        private void ScreenTouch(EventArgs e)
+        {
+            EventHandler handler = ScreenTouched;
+            if (handler != null)
+            {
+                handler(this, e);
+            }
+        }
+        private void ScreenTap(EventArgs e)
+        {
+            EventHandler handler = ScreenTapped;
+            if (handler != null)
+            {
+                handler(this, e);
+            }
+        }
+#endif
+        
         public void RunGameMode()
         {
             currentMode = gameMode;
@@ -153,6 +174,27 @@ namespace Galaga
             }
 
             previousKbState = kbState;
+#elif ANDROID
+            TouchCollection touchCollection = TouchPanel.GetState();
+            foreach(TouchLocation t in touchCollection)
+            {
+                PresentationParameters windowSize = GraphicsDevice.PresentationParameters;
+                int x = (int)((t.Position.X / (float)windowSize.BackBufferWidth) * GAME_WIDTH);
+                int y = (int)((t.Position.Y / (float)windowSize.BackBufferHeight) * GAME_HEIGHT);
+                switch (t.State)
+                {
+                    case TouchLocationState.Invalid:
+                        break;
+                    case TouchLocationState.Moved:
+                        ScreenTouch(new ScreenTouchEventArgs(x, y, t.Id));
+                        break;
+                    case TouchLocationState.Pressed:
+                        ScreenTap(new ScreenTapEventArgs(x, y));
+                        break;
+                    case TouchLocationState.Released:
+                        break;
+                }
+            }
 #endif
 
             deltaTime = gameTime.ElapsedGameTime.Milliseconds;
