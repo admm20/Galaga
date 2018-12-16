@@ -25,9 +25,9 @@ namespace Galaga
         
         private RenderTarget2D gameRenderer;
 
-        GameMode currentMode;
-        GameMode gameMode;
-        GameMode menu;
+        GameState currentMode;
+        GameState gameMode;
+        GameState menu;
 
         public int deltaTime = 1;
 
@@ -97,8 +97,9 @@ namespace Galaga
             gameRenderer = new RenderTarget2D(GraphicsDevice, GAME_WIDTH, GAME_HEIGHT);
 
             gameMode = new GameMode(this);
-            menu = new GameMode(this);
-            RunGameMode();
+            menu = new Menu(this);
+            //RunGameMode();
+            RunMenu();
 
             base.Initialize();
         }
@@ -189,7 +190,7 @@ namespace Galaga
             }
 
             GraphicsDevice.SetRenderTarget(null);
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.White * 0.1f);
             spriteBatch.Begin();
             spriteBatch.Draw(gameRenderer, rendererPosition, Color.White);
             //spriteBatch.Draw(blackTile, rendererPosition, Color.White * transition_opacity);

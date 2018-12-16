@@ -23,7 +23,7 @@ namespace Galaga
         public Vector2 Position;
         public Rectangle Hitbox = new Rectangle(0, 0, 3 * Scale, 8 * Scale);
 
-        public static void UpdateBulletsPosition(int deltaTime)
+        public static void UpdateBulletsPosition(int deltaTime, GameMode game)
         {
             for(int i = ListOfBullets.Count-1; i >=0; i--)
             {
@@ -41,6 +41,17 @@ namespace Galaga
                         // bullet hit enemy
                         RotatingShip.ListOfShips.RemoveAt(j);
                         hit = true;
+                        game.GameEvent(GameEventEnum.ENEMY_DESTROYED);
+                        break;
+                    }
+                    else if(bullet.Type == BulletType.ENEMY
+                        && bullet.Hitbox.Intersects(ship.Hitbox)
+                        && ship.Type == ShipTypeEnum.PLAYER)
+                    {
+                        RotatingShip.ListOfShips.RemoveAt(j);
+                        hit = true;
+                        game.GameEvent(GameEventEnum.PLAYER_DESTROYED);
+                        break;
                     }
                 }
 
@@ -63,7 +74,7 @@ namespace Galaga
                 bullet.Hitbox.Y = (int)bullet.Position.Y;
 
                 // remove if it's outside screen
-                if (bullet.Position.Y < -100 || bullet.Position.Y > GalagaGame.GAME_HEIGHT + 100)
+                if (bullet.Position.Y < -40 || bullet.Position.Y > GalagaGame.GAME_HEIGHT + 40)
                 {
                     ListOfBullets.RemoveAt(i);
                     continue;

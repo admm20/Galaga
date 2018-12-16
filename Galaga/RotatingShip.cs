@@ -50,7 +50,6 @@ namespace Galaga
             SetDirection(AngleToVector(angle));
             TargetPosition.Y = (int)type * (8 + 16);
             ListOfShips.Add(this);
-            Console.WriteLine("dodaje " + type.ToString());
         }
         
 

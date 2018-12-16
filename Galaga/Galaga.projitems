@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Bullet.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EnemyGrid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EnemyShip.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KeyboardEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayerShip.cs" />
