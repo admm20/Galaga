@@ -24,6 +24,8 @@ namespace Galaga
 
         Random random;
 
+        Texture2D numbersTexture;
+
         private int Lifes = 3;
         private int Points = 0;
 
@@ -69,6 +71,24 @@ namespace Galaga
             foreach (RotatingShip s in RotatingShip.ListOfShips) s.Draw(spriteBatch);
             foreach (Bullet b in Bullet.ListOfBullets) b.Draw(spriteBatch);
 
+            // draw points
+            string score = Points.ToString();
+            for(int i = 0; i < score.Length; i++)
+            {
+                int digit = Int32.Parse(score[i].ToString());
+                int width = numbersTexture.Width / 10 + 1;
+                spriteBatch.Draw(numbersTexture, new Vector2(200 + i * 40, 50), new Rectangle(digit * width, 0, width, 30), Color.White);
+            }
+
+            // draw lifes
+            string lifes = Lifes.ToString();
+            for (int i = 0; i < lifes.Length; i++)
+            {
+                int digit = Int32.Parse(lifes[i].ToString());
+                int width = numbersTexture.Width / 10 + 1;
+                spriteBatch.Draw(numbersTexture, new Vector2(GalagaGame.GAME_WIDTH - 100 + i * 40, 50), new Rectangle(digit * width, 0, width, 30), Color.White);
+            }
+
             spriteBatch.End();
         }
 
@@ -76,6 +96,7 @@ namespace Galaga
         {
             RotatingShip.EnemyAndPlayerTexture = content.Load<Texture2D>("Textures/enemies_player");
             Bullet.BulletTexture = content.Load<Texture2D>("Textures/bullet");
+            numbersTexture = content.Load<Texture2D>("Textures/numbers");
         }
 
         private void SpawnAllEnemies()
@@ -147,7 +168,7 @@ namespace Galaga
             Bullet.UpdateBulletsPosition(deltaTime, this);
             EnemyShip.UpdateEnemyPosition(deltaTime);
 
-            if(random.Next() % 50 == 5)
+            if(random.Next() % 30 == 5)
             {
                 foreach(RotatingShip ship in RotatingShip.ListOfShips)
                 {

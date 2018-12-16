@@ -193,7 +193,6 @@ namespace Galaga
             GraphicsDevice.Clear(Color.White * 0.1f);
             spriteBatch.Begin();
             spriteBatch.Draw(gameRenderer, rendererPosition, Color.White);
-            //spriteBatch.Draw(blackTile, rendererPosition, Color.White * transition_opacity);
             spriteBatch.End();
 
             base.Draw(gameTime);
