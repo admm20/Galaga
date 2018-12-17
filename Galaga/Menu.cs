@@ -85,6 +85,10 @@ namespace Galaga
 #endif
                     game.RunGameMode();
                 }
+                else if(hover==2)
+                {
+                    game.Exit();
+                }
             }
         }
 #if ANDROID
