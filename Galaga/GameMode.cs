@@ -217,15 +217,17 @@ namespace Galaga
             Lifes = 3;
             Points = 0;
             playerIsDead = false;
+            int playerShipYposition = GalagaGame.GAME_HEIGHT - 200;
 #if WINDOWS
             game.KeyboardKeysDown += KeysHoldDown;
             game.KeyboardKeyClicked += KeyClicked;
 #elif ANDROID
+            playerShipYposition -= 200;
             game.ScreenTapped += ScreenTapped;
             game.ScreenTouched += ScreenTouched;
 #endif
 
-            playerShip = new PlayerShip(GalagaGame.GAME_WIDTH / 2, GalagaGame.GAME_HEIGHT - 200);
+            playerShip = new PlayerShip(GalagaGame.GAME_WIDTH / 2, playerShipYposition);
             
             enemyGrid = new EnemyGrid(new Vector2(100, 200));
 
@@ -313,7 +315,7 @@ namespace Galaga
 
         private Point getRandomPointOnScreen()
         {
-            return new Point(random.Next(-400, GalagaGame.GAME_WIDTH+400), random.Next(900, GalagaGame.GAME_HEIGHT-400));
+            return new Point(random.Next(-400, GalagaGame.GAME_WIDTH+400), random.Next(900, GalagaGame.GAME_HEIGHT-500));
         }
 
         void ScreenTapped(object s, EventArgs _t)
@@ -348,13 +350,13 @@ namespace Galaga
                 {
                     float x = playerShip.Position.X - move;
                     if (x >= click.X)
-                        playerShip.Position.X = x;
+                        playerShip.MovePlayer(x);
                 }
                 else // move right
                 {
                     float x = playerShip.Position.X + move;
                     if (x <= click.X)
-                        playerShip.Position.X = x;
+                        playerShip.MovePlayer(x);
                 }
             }
 
