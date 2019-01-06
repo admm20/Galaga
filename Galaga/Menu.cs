@@ -97,9 +97,9 @@ namespace Galaga
             ScreenTapEventArgs t = (ScreenTapEventArgs)_t;
 
             Rectangle startRect = new Rectangle(GalagaGame.GAME_WIDTH / 2 - start_button.Width / 2, 900-80, 
-                start_button.Width, start_button.Height+80);
+                start_button.Width, start_button.Height+130);
             Rectangle exitRect = new Rectangle(GalagaGame.GAME_WIDTH / 2 - end_button.Width / 2, 1100-80,
-                end_button.Width, end_button.Height+80);
+                end_button.Width, end_button.Height+130);
             //new Vector2(GalagaGame.GAME_WIDTH / 2 - start_selected_button.Width / 2, 900)
             Point click = new Point(t.x, t.y);
             if (startRect.Contains(click))

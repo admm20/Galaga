@@ -46,6 +46,10 @@ namespace Galaga
 
         private Timer gridMovingTimer;
 
+#if ANDROID
+        private Timer shootingTimer;
+#endif
+
         public void GameEvent(GameEventEnum ev)
         {
             switch (ev)
@@ -77,24 +81,32 @@ namespace Galaga
                     shot.Play(0.5f, 0, 0);
                     break;
                 case GameEventEnum.GAME_OVER:
+                    gridMovingTimer.Delete();
                     Timer endDelay = new Timer((t) =>
                     {
-                        gridMovingTimer.Delete();
-                        game.RunMenu();
+                        ExitGameMode();
                     }, 2000, false);
-#if WINDOWS
-                    game.KeyboardKeysDown -= KeysHoldDown;
-                    game.KeyboardKeyClicked -= KeyClicked;
-#elif ANDROID
-                    game.ScreenTapped -= ScreenTapped;
-                    game.ScreenTouched -= ScreenTouched;
-#endif
 
                     break;
             }
         }
 
-        public override void Draw(SpriteBatch spriteBatch)
+        public void ExitGameMode()
+        {
+#if WINDOWS
+            game.KeyboardKeysDown -= KeysHoldDown;
+            game.KeyboardKeyClicked -= KeyClicked;
+#elif ANDROID
+            game.ScreenTapped -= ScreenTapped;
+            game.ScreenTouched -= ScreenTouched;
+            shootingTimer.Delete();
+#endif
+            gridMovingTimer.Delete();
+            Timer.CreatedTimers.Clear();
+            game.RunMenu();
+        }
+
+    public override void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp);
 
@@ -127,9 +139,9 @@ namespace Galaga
             }
 
             // draw fire button in android version
-#if ANDROID
-            spriteBatch.Draw(fireTexture, new Vector2(700, 1300), Color.White*0.8f);
-#endif
+//#if ANDROID
+//            spriteBatch.Draw(fireTexture, new Vector2(700, 1300), Color.White*0.8f);
+//#endif
 
             spriteBatch.End();
         }
@@ -235,7 +247,16 @@ namespace Galaga
                 }
             }, 800, true);
 
+            // shoot automatically every 0.7s in Android version
+#if ANDROID
+            shootingTimer = new Timer((el) => {
+                if (!RotatingShip.ListOfShips.Contains(playerShip))
+                    return;
 
+                Bullet b = new Bullet(playerShip.Hitbox.Center.X - 2 * RotatingShip.Scale, playerShip.Position.Y, BulletType.ALLY);
+                GameEvent(GameEventEnum.PLAYER_FIRE);
+            }, 700, true);
+#endif
 
         }
 
@@ -297,19 +318,19 @@ namespace Galaga
 
         void ScreenTapped(object s, EventArgs _t)
         {
-            ScreenTapEventArgs t = (ScreenTapEventArgs)_t;
+            //ScreenTapEventArgs t = (ScreenTapEventArgs)_t;
             
-            Point click = new Point(t.x, t.y);
-            Rectangle fireButtonPos = new Rectangle(700, 1300, fireTexture.Width, fireTexture.Height);
-            if (fireButtonPos.Contains(click))
-            {
-                // don't shoot if player is dead
-                if (!RotatingShip.ListOfShips.Contains(playerShip))
-                    return;
+            //Point click = new Point(t.x, t.y);
+            //Rectangle fireButtonPos = new Rectangle(700, 1300, fireTexture.Width, fireTexture.Height);
+            //if (fireButtonPos.Contains(click))
+            //{
+            //    // don't shoot if player is dead
+            //    if (!RotatingShip.ListOfShips.Contains(playerShip))
+            //        return;
 
-                Bullet b = new Bullet(playerShip.Hitbox.Center.X - 2 * RotatingShip.Scale, playerShip.Position.Y, BulletType.ALLY);
-                GameEvent(GameEventEnum.PLAYER_FIRE);
-            }
+            //    Bullet b = new Bullet(playerShip.Hitbox.Center.X - 2 * RotatingShip.Scale, playerShip.Position.Y, BulletType.ALLY);
+            //    GameEvent(GameEventEnum.PLAYER_FIRE);
+            //}
         }
 
         int movingTouchId = -1;
@@ -317,21 +338,40 @@ namespace Galaga
         {
             ScreenTouchEventArgs t = (ScreenTouchEventArgs)_t;
             Point click = new Point(t.x, t.y);
-            Rectangle biggerPlayerHitbox = playerShip.Hitbox;
-            biggerPlayerHitbox.X -= 100;
-            biggerPlayerHitbox.Y -= 100;
-            biggerPlayerHitbox.Width += 100;
-            biggerPlayerHitbox.Height += 100;
-            Console.WriteLine(biggerPlayerHitbox.Width);
-            if (biggerPlayerHitbox.Contains(click))
+            Rectangle touchArea = new Rectangle(0, GalagaGame.GAME_HEIGHT - 500, 
+                GalagaGame.GAME_WIDTH, GalagaGame.GAME_HEIGHT);
+
+            if (touchArea.Contains(click))
             {
-                movingTouchId = t.id;
+                float move = game.deltaTime * 0.7f;
+                if (click.X < playerShip.Position.X) // move left
+                {
+                    float x = playerShip.Position.X - move;
+                    if (x >= click.X)
+                        playerShip.Position.X = x;
+                }
+                else // move right
+                {
+                    float x = playerShip.Position.X + move;
+                    if (x <= click.X)
+                        playerShip.Position.X = x;
+                }
             }
 
-            if(movingTouchId == t.id)
-            {
-                playerShip.MovePlayer(t.x);
-            }
+            //Rectangle biggerPlayerHitbox = playerShip.Hitbox;
+            //biggerPlayerHitbox.X -= 100;
+            //biggerPlayerHitbox.Y -= 100;
+            //biggerPlayerHitbox.Width += 100;
+            //biggerPlayerHitbox.Height += 100;
+            //if (biggerPlayerHitbox.Contains(click))
+            //{
+            //    movingTouchId = t.id;
+            //}
+
+            //if(movingTouchId == t.id)
+            //{
+            //    playerShip.MovePlayer(t.x);
+            //}
         }
 
         void KeysHoldDown(object s, EventArgs _k)

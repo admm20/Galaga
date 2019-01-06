@@ -150,7 +150,13 @@ namespace Galaga
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
             {
                 //Exit();
-                Process.KillProcess(Process.MyPid());
+                if (currentMode is Menu)
+                    Process.KillProcess(Process.MyPid());
+                else if (currentMode is GameMode)
+                {
+                    GameMode g = (GameMode)currentMode;
+                    g.ExitGameMode();
+                }
             }
 #endif
 
