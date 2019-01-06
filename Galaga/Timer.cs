@@ -53,7 +53,7 @@ namespace Galaga
             }
         }
 
-        private void Delete()
+        public void Delete()
         {
             TimersToBeDeleted.Add(this);
         }

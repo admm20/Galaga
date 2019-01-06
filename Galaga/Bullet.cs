@@ -42,6 +42,7 @@ namespace Galaga
                         RotatingShip.ListOfShips.RemoveAt(j);
                         hit = true;
                         game.GameEvent(GameEventEnum.ENEMY_DESTROYED);
+                        game.SpawnExplosion(ship.Position.X, ship.Position.Y);
                         break;
                     }
                     else if(bullet.Type == BulletType.ENEMY
@@ -51,6 +52,7 @@ namespace Galaga
                         RotatingShip.ListOfShips.RemoveAt(j);
                         hit = true;
                         game.GameEvent(GameEventEnum.PLAYER_DESTROYED);
+                        game.SpawnExplosion(ship.Position.X, ship.Position.Y);
                         break;
                     }
                 }

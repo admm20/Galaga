@@ -31,6 +31,7 @@ namespace Galaga
             movingRight = true;
             Speed = 0.8f;
         }
+        
 
         public void UpdateEnemyGridPosition(int deltaTime)
         {

@@ -27,13 +27,24 @@ namespace Galaga
 
         Texture2D numbersTexture;
         Texture2D fireTexture;
+        Texture2D explosionTexture;
 
         SoundEffect destroy_enemy;
         SoundEffect explosion;
         SoundEffect shot;
 
+        private List<Explosion> explosions;
+
         private int Lifes = 3;
         private int Points = 0;
+        private bool playerIsDead;
+
+        // every enemy on grid must be in the same animation frame
+        // if enemyAnimation == 0, then show frame 6
+        // if 1, then show frame 7
+        private int enemyAnimation = 0;
+
+        private Timer gridMovingTimer;
 
         public void GameEvent(GameEventEnum ev)
         {
@@ -48,6 +59,7 @@ namespace Galaga
                     }
                     break;
                 case GameEventEnum.PLAYER_DESTROYED:
+                    playerIsDead = true;
                     explosion.Play(0.5f, 0, 0);
                     Lifes--;
                     if (Lifes < 1)
@@ -56,14 +68,20 @@ namespace Galaga
                     {
                         Timer respawn = new Timer((t) => {
                             playerShip = new PlayerShip(GalagaGame.GAME_WIDTH / 2, GalagaGame.GAME_HEIGHT - 200);
+                            playerIsDead = false;
                         },
-                        500, false);
+                        2000, false);
                     }
                     break;
                 case GameEventEnum.PLAYER_FIRE:
                     shot.Play(0.5f, 0, 0);
                     break;
                 case GameEventEnum.GAME_OVER:
+                    Timer endDelay = new Timer((t) =>
+                    {
+                        gridMovingTimer.Delete();
+                        game.RunMenu();
+                    }, 2000, false);
 #if WINDOWS
                     game.KeyboardKeysDown -= KeysHoldDown;
                     game.KeyboardKeyClicked -= KeyClicked;
@@ -71,7 +89,7 @@ namespace Galaga
                     game.ScreenTapped -= ScreenTapped;
                     game.ScreenTouched -= ScreenTouched;
 #endif
-                    game.RunMenu();
+
                     break;
             }
         }
@@ -101,6 +119,13 @@ namespace Galaga
                 spriteBatch.Draw(numbersTexture, new Vector2(GalagaGame.GAME_WIDTH - 100 + i * 40, 50), new Rectangle(digit * width, 0, width, 30), Color.White);
             }
 
+            // draw explosions
+            foreach(Explosion e in explosions)
+            {
+                spriteBatch.Draw(explosionTexture, new Vector2(e.x, e.y), new Rectangle(31*e.currentFrame,0,31,32), 
+                    Color.White, 0, Vector2.Zero, RotatingShip.Scale, SpriteEffects.None, 0);
+            }
+
             // draw fire button in android version
 #if ANDROID
             spriteBatch.Draw(fireTexture, new Vector2(700, 1300), Color.White*0.8f);
@@ -115,6 +140,7 @@ namespace Galaga
             Bullet.BulletTexture = content.Load<Texture2D>("Textures/bullet");
             numbersTexture = content.Load<Texture2D>("Textures/numbers");
             fireTexture = content.Load<Texture2D>("Textures/fire_button");
+            explosionTexture = content.Load<Texture2D>("Textures/explosion");
 
             //audio
             destroy_enemy = content.Load<SoundEffect>("Audio/destroy_enemy");
@@ -122,13 +148,33 @@ namespace Galaga
             shot = content.Load<SoundEffect>("Audio/shot");
         }
 
+        public void SpawnExplosion(float x, float y)
+        {
+            Explosion exp = new Explosion(x, y);
+            explosions.Add(exp);
+            Timer ti = null;
+            ti = new Timer((elapsed) =>
+            {
+                exp.currentFrame++;
+                if (exp.currentFrame > 4)
+                {
+                    ti.Delete();
+                    explosions.Remove(exp);
+                }
+            }, Explosion.ShiftTime, true);
+        }
+        
         private void SpawnAllEnemies()
         {
             for (int i = 0; i < 4; i++)
             {
+                int randX = random.Next(200, GalagaGame.GAME_WIDTH - 200);
+                int randY = random.Next(500, GalagaGame.GAME_HEIGHT);
                 List<Point> bezierMove = QuadraticBezier.CalculatePoints(
                     new Point(-200 + (i * 600), -100),
-                    new Point(GalagaGame.GAME_WIDTH / 2, GalagaGame.GAME_HEIGHT),
+                    //new Point(GalagaGame.GAME_WIDTH / 2, GalagaGame.GAME_HEIGHT),
+                    //new Point(randX, randY),
+                    getRandomPointOnScreen(),
                     new Point(GalagaGame.GAME_WIDTH / 2, 700),
                     30);
 
@@ -147,9 +193,6 @@ namespace Galaga
 
                     }, 200 * j + 1500*i, false);
                 }
-
-
-
             }
         }
 
@@ -157,9 +200,11 @@ namespace Galaga
         {
             EnemyShip.ListOfShips.Clear();
             Bullet.ListOfBullets.Clear();
+            explosions.Clear();
 
             Lifes = 3;
             Points = 0;
+            playerIsDead = false;
 #if WINDOWS
             game.KeyboardKeysDown += KeysHoldDown;
             game.KeyboardKeyClicked += KeyClicked;
@@ -174,9 +219,24 @@ namespace Galaga
 
             SpawnAllEnemies();
 
-            Timer gridMovingTimer = new Timer((t) => {
-                enemyGrid.UpdateEnemyGridPosition(game.deltaTime);}, 1000, true);
-            
+            gridMovingTimer = new Timer((t) => {
+                enemyGrid.UpdateEnemyGridPosition(game.deltaTime);
+                enemyAnimation = (enemyAnimation == 0) ? 1 : 0;
+                foreach(RotatingShip s in RotatingShip.ListOfShips)
+                {
+                    if (s is EnemyShip)
+                    {
+                        EnemyShip en = (EnemyShip)s;
+                        if (en.MovingOnGrid)
+                        {
+                            en.SetTexture(6 + enemyAnimation);
+                        }
+                    }
+                }
+            }, 800, true);
+
+
+
         }
 
         public override void TransitionEffectCompleted()
@@ -192,22 +252,47 @@ namespace Galaga
         public override void Update(int deltaTime)
         {
             Bullet.UpdateBulletsPosition(deltaTime, this);
-            EnemyShip.UpdateEnemyPosition(deltaTime);
+            EnemyShip.UpdateEnemyPosition(deltaTime, this);
 
-            if(random.Next() % 30 == 5)
+            // random shooting
+            if (!playerIsDead && random.Next() % 50 == 5)
             {
-                foreach(RotatingShip ship in RotatingShip.ListOfShips)
+                foreach (RotatingShip ship in RotatingShip.ListOfShips)
                 {
-                    if(ship.Type != ShipTypeEnum.PLAYER)
+                    if (ship is EnemyShip)
                     {
-                        if(random.Next() % 50 == 6)
+                        if (random.Next() % 70 == 6)
                         {
                             Bullet b = new Bullet(ship.Hitbox.Center.X - 2 * RotatingShip.Scale, ship.Position.Y, BulletType.ENEMY);
                         }
                     }
                 }
             }
-            
+
+            // choose one enemy on grid and do random movement
+            if (!playerIsDead && random.Next() % 60 == 5)
+            {
+                foreach (RotatingShip ship in RotatingShip.ListOfShips)
+                {
+                    if (ship is EnemyShip)
+                    {
+                        EnemyShip enemy = (EnemyShip)ship;
+                        if (random.Next() % 30 == 6 && enemy.MovingOnGrid)
+                        {
+                            List<Point> road_1 = QuadraticBezier.CalculatePoints(
+                                new Point((int)enemy.Position.X, (int)enemy.Position.Y),
+                                getRandomPointOnScreen(),
+                                getRandomPointOnScreen(), 30);
+                            enemy.BeginMovingOnCurve(road_1, 1.0f);
+                        }
+                    }
+                }
+            }
+        }
+
+        private Point getRandomPointOnScreen()
+        {
+            return new Point(random.Next(-400, GalagaGame.GAME_WIDTH+400), random.Next(900, GalagaGame.GAME_HEIGHT-400));
         }
 
         void ScreenTapped(object s, EventArgs _t)
@@ -285,6 +370,7 @@ namespace Galaga
         {
             this.game = game;
             random = new Random();
+            explosions = new List<Explosion>(); 
         }
     }
 }

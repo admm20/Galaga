@@ -19,11 +19,9 @@ namespace Galaga
         // rotation
         public Vector2 Rotation;
         public float Angle;
+        
 
-        // where sprite is located on texture
-        public Rectangle PositionInTexture;
-
-        // position in game (on screen)
+        // position on texture
         public Rectangle TargetPosition = new Rectangle(0,0,16,16);
 
         public ShipTypeEnum Type;
@@ -79,6 +77,11 @@ namespace Galaga
             int textureIndex = (int)Math.Floor(tempAngle);
 
             TargetPosition.X = textureIndex * (16+8);
+        }
+
+        public void SetTexture(int idx)
+        {
+            TargetPosition.X = idx * (16 + 8);
         }
         
         public void Draw(SpriteBatch spBatch)

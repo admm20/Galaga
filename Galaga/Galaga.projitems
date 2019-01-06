@@ -12,16 +12,18 @@
     <Compile Include="$(MSBuildThisFileDirectory)Bullet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EnemyGrid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EnemyShip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Explosion.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KeyboardEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayerShip.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuadraticBezier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RotatingShip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ScreenTouchEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShipTypeEnum.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GalagaGame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GameMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GameState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Menu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Timer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TouchScreenEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ScreenTapEventArgs.cs" />
   </ItemGroup>
 </Project>

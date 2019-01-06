@@ -14,15 +14,15 @@ namespace Galaga
 {
     class Menu : GameState
     {
-        GalagaGame game;
+        private GalagaGame game;
 
-        Texture2D background;
-        Texture2D start_button;
-        Texture2D start_selected_button;
-        Texture2D end_button;
-        Texture2D end_selected_button;
+        private Texture2D background;
+        private Texture2D start_button;
+        private Texture2D start_selected_button;
+        private Texture2D end_button;
+        private Texture2D end_selected_button;
 
-        int hover = 1;
+        private int hover = 1;
 
         public override void Draw(SpriteBatch spriteBatch)
         {
@@ -96,10 +96,10 @@ namespace Galaga
         {
             ScreenTapEventArgs t = (ScreenTapEventArgs)_t;
 
-            Rectangle startRect = new Rectangle(GalagaGame.GAME_WIDTH / 2 - start_button.Width / 2, 900, 
-                start_button.Width, start_button.Height);
-            Rectangle exitRect = new Rectangle(GalagaGame.GAME_WIDTH / 2 - end_button.Width / 2, 1100,
-                end_button.Width, end_button.Height);
+            Rectangle startRect = new Rectangle(GalagaGame.GAME_WIDTH / 2 - start_button.Width / 2, 900-80, 
+                start_button.Width, start_button.Height+80);
+            Rectangle exitRect = new Rectangle(GalagaGame.GAME_WIDTH / 2 - end_button.Width / 2, 1100-80,
+                end_button.Width, end_button.Height+80);
             //new Vector2(GalagaGame.GAME_WIDTH / 2 - start_selected_button.Width / 2, 900)
             Point click = new Point(t.x, t.y);
             if (startRect.Contains(click))

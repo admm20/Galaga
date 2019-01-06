@@ -25,10 +25,12 @@ namespace Galaga
                 return; 
 
             MovingOnCurve = true;
+            MovingOnGrid = false;
             currentPath = bezierCurvePoints;
             currentSection = 1;
             traveledDistanceInSection = 0;
             this.speed = speed;
+            landing = false;
 
             Position.X = bezierCurvePoints[0].X;
             Position.Y = bezierCurvePoints[0].Y;
@@ -42,7 +44,7 @@ namespace Galaga
                 );
         }
 
-        public static void UpdateEnemyPosition(int deltaTime)
+        public static void UpdateEnemyPosition(int deltaTime, GameMode game)
         {
             foreach(RotatingShip ship in ListOfShips)
             {
@@ -51,6 +53,15 @@ namespace Galaga
                     EnemyShip enemy = (EnemyShip)ship;
                     if (!enemy.MovingOnCurve)
                         continue;
+
+                    if (enemy.landing)
+                    {
+                        //enemy.currentPath[enemy.currentPath.Count - 1].X = (int)EnemyGrid.Position.X; // doesn't work because Point is struct
+                        Point p = enemy.currentPath[enemy.currentPath.Count - 1];
+                        p.X = (int)(EnemyGrid.Position.X + enemy.PositionOnGrid.X * (16 + EnemyGrid.gap) * RotatingShip.Scale);
+                        enemy.currentPath[enemy.currentPath.Count - 1] = p;
+                    }
+
                     Point src = enemy.currentPath[enemy.currentSection - 1];
                     Point dst = enemy.currentPath[enemy.currentSection];
 
@@ -66,7 +77,6 @@ namespace Galaga
                         enemy.Position,
                         new Vector2(src.X, src.Y));
                     
-
                     if(enemy.traveledDistanceInSection > moveVector.Length())
                     {
                         enemy.currentSection++;
@@ -76,7 +86,7 @@ namespace Galaga
                             // end of road. Start landing procedure
                             enemy.LandOnGrid();
                             enemy.landing = true;
-                            enemy.speed = 1.0f;
+                            //enemy.speed = 1.0f;
                         }
                         else if (enemy.landing)
                         {
@@ -84,6 +94,8 @@ namespace Galaga
                             enemy.landing = false;
                             enemy.MovingOnCurve = false;
                             enemy.MovingOnGrid = true;
+                            enemy.Position.X = (int)(EnemyGrid.Position.X + enemy.PositionOnGrid.X * (16 + EnemyGrid.gap) * RotatingShip.Scale);
+                            enemy.Position.Y = (int)(EnemyGrid.Position.Y + enemy.PositionOnGrid.Y * (16 + EnemyGrid.gap) * RotatingShip.Scale);
                         }
                     }
 
