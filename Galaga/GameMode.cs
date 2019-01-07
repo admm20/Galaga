@@ -106,7 +106,11 @@ namespace Galaga
             shootingTimer.Delete();
 #endif
             gridMovingTimer.Delete();
-            Timer.CreatedTimers.Clear();
+            //Timer.CreatedTimers.Clear();
+            foreach(Timer t in Timer.CreatedTimers)
+            {
+                Timer.Delete(t);
+            }
             game.RunMenu();
         }
 

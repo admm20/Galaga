@@ -58,6 +58,11 @@ namespace Galaga
             TimersToBeDeleted.Add(this);
         }
 
+        public static void Delete(Timer t)
+        {
+            TimersToBeDeleted.Add(t);
+        }
+
         public static void UpdateAllTimers(int deltaTime)
         {
             foreach (Timer t in TimersToBeDeleted)
