@@ -71,7 +71,11 @@ namespace Galaga
                     else
                     {
                         Timer respawn = new Timer((t) => {
-                            playerShip = new PlayerShip(GalagaGame.GAME_WIDTH / 2, GalagaGame.GAME_HEIGHT - 200);
+                            int playerShipYposition = GalagaGame.GAME_HEIGHT - 200;
+#if ANDROID
+                            playerShipYposition -= 200;
+#endif
+                            playerShip = new PlayerShip(GalagaGame.GAME_WIDTH / 2, playerShipYposition);
                             playerIsDead = false;
                         },
                         2000, false);
